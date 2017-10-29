@@ -128,17 +128,7 @@ void imprime (grafo_P grafo){
 	
 }
 
-void busca_profundidade_init (grafo_T *grafo, int inicio){
-	int i, *visitado[MAX];
-	
-	no_lista_adj_P no = grafo->vetorListas[inicio].cabeca;
-	for (i = 0; i < MAX; i++)
-		visitado[i] = 0;
-	
-		
-	busca_profundidade(grafo, inicio, visitado);
-	return;
-}
+//--------------------------------------------------------------
 
 void busca_profundidade (grafo_T *grafo, int v, int visitado[]){
 	no_lista_adj_P no = grafo->vetorListas[v].cabeca;
@@ -157,6 +147,20 @@ void busca_profundidade (grafo_T *grafo, int v, int visitado[]){
 	return;
 }
 
+void busca_profundidade_init (grafo_T *grafo, int inicio){
+	int i, visitado[MAX];
+	
+	no_lista_adj_P no = grafo->vetorListas[inicio].cabeca;
+	for (i = 0; i < MAX; i++)
+		visitado[i] = 0;
+	
+		
+	busca_profundidade(grafo, inicio, visitado);
+	return;
+}
+
+//----------------------------------------------------------------
+
 int minDist (int dist[], int visitado[], int n){
 	int min = 1000000, indice_min = -1, i;
 	
@@ -168,24 +172,6 @@ int minDist (int dist[], int visitado[], int n){
 	}
 	
 	return indice_min;
-}
-
-void Djikstra_init (grafo_T *grafo, int inicio){
-	int dist[grafo->n_vertices], visitado[grafo->n_vertices], *anterior[grafo->n_vertices], i;
-	
-	for (i = 0; i < grafo->n_vertices; i++){
-		dist[i] = 1000000;
-		visitado[i] = 0;
-	}
-	
-	dist[inicio] = 0;
-	
-	
-	Djikstra(grafo, inicio, dist, visitado);
-	
-	for (i = 0; i < grafo->n_vertices; i++){
-		printf("%d: %d\n", i, dist[i]);
-	}
 }
 
 void Djikstra (grafo_T *grafo, int origem, int dist[], int visitado[]){
@@ -208,6 +194,68 @@ void Djikstra (grafo_T *grafo, int origem, int dist[], int visitado[]){
 	Djikstra(grafo, prox, dist, visitado);
 	
 }
+
+void Djikstra_init (grafo_T *grafo, int inicio){
+	int dist[grafo->n_vertices], visitado[grafo->n_vertices], i;
+	
+	for (i = 0; i < grafo->n_vertices; i++){
+		dist[i] = 1000000;
+		visitado[i] = 0;
+	}
+	
+	dist[inicio] = 0;
+	
+	
+	Djikstra(grafo, inicio, dist, visitado);
+	
+	for (i = 0; i < grafo->n_vertices; i++){
+		printf("%d: %d\n", i, dist[i]);
+	}
+}
+
+//-----------------------------------------------------------------------------------
+
+void Ord_Topologica (grafo_T *grafo, int vertice, int visitado[], int pilha[]){
+	no_lista_adj_P no = grafo->vetorListas[vertice].cabeca;
+	int i;
+	
+	visitado[vertice] = 1;
+	
+	while (no != NULL){
+		if (visitado[no->vertice] == 0){
+			Ord_Topologica(grafo, no->vertice, visitado, pilha);
+		}
+		no = no->prox;
+	}
+	
+	for (i = 0; i < grafo->n_vertices; i++){
+		if (pilha[i] == -1){
+			pilha[i] = vertice;
+			break;
+		}
+	}
+}
+
+void Ord_Topologica_init (grafo_T *grafo){
+	int i, visitado[grafo->n_vertices], pilha[grafo->n_vertices];
+	
+	for (i = 0; i < grafo->n_vertices; i++){
+		visitado[i] = 0;
+		pilha[i] = -1;
+	}
+	
+	for (i = 0; i < grafo->n_vertices; i++){
+		if (visitado[i] == 0){
+			Ord_Topologica(grafo, i, visitado, pilha);
+		}
+	}
+	
+	for (i = grafo->n_vertices - 1; i >= 0; i--){
+		printf("%d: %d\n", grafo->n_vertices - i, pilha[i]);
+	}
+}
+
+//-------------------------------------------------------------------------------
 
 void menu () {
 	int seletor, var1, var2, var3;
@@ -304,18 +352,47 @@ void menu () {
 				break;
 				
 			case 5:
-				busca_profundidade_init(grafo, 0);
+				if (!grafo){
+					printf("Grafo nao existe, crie-o antes de tentar realizar uma operacao.");
+					getch();
+					system("cls");
+					break;
+				}
+				printf("Qual o ponto de partida?\n>");
+				scanf("%d", &var1);
+				system("cls");
+				printf("Ponto de partida: %d\n\n", var1);
+				busca_profundidade_init(grafo, var1);
 				getch();
 				system("cls");
 				break;
 			
 			case 6:
-				Djikstra_init(grafo, 0);
+				if (!grafo){
+					printf("Grafo nao existe, crie-o antes de tentar realizar uma operacao.");
+					getch();
+					system("cls");
+					break;
+				}
+				printf("Qual o ponto de partida?\n>");
+				scanf("%d", &var1);
+				system("cls");
+				printf("Ponto de partida: %d\n\n", var1);
+				Djikstra_init(grafo, var1);
 				getch();
 				system("cls");
 				break;
 				
 			case 7:
+				if (!grafo){
+					printf("Grafo nao existe, crie-o antes de tentar realizar uma operacao.");
+					getch();
+					system("cls");
+					break;
+				}
+				Ord_Topologica_init(grafo);
+				getch();
+				system("cls");
 				break;
 				
 			case 8:
